@@ -1,0 +1,36 @@
+{
+  "trojan_name": "armed-key-exfil",
+  "trigger": {
+    "mechanism": "exact-match on the 32-bit SPI input word latched at START, under encryption mode",
+    "magic_word": "0xA5A50FF0",
+    "gate": "ENC_DEC == 0 (arms on encryption only)"
+  },
+  "state_element": {
+    "reg": "armed",
+    "set_when": "cnt==0 && START && shreg==magic_word && ENC_DEC==0",
+    "cleared_by": "synchronous reset (RST_N low)"
+  },
+  "payload": {
+    "type": "key_exfiltration",
+    "site": "FSM result latch (cnt==4 branch)",
+    "action": "load localparam KEY (0xD81E0247) into the SPI shift register instead of the real ciphertext",
+    "observable_on": "MISO, shifted out MSB-first on the read-out following the trigger"
+  },
+  "stealth": {
+    "area_overhead": "1 flip-flop (armed) plus a 32-bit equality comparator",
+    "functional_impact": "none until armed; outputs are byte-for-byte identical to the golden design",
+    "timing_impact": "none; BUSY remains high for exactly 4 cycles and the SPI protocol is unchanged",
+    "trigger_probability": "2^-32 per random encryption; the magic word is never produced by normal traffic",
+    "recovery": "reset disarms, restoring normal operation and hiding evidence"
+  },
+  "insertion": {
+    "tool": "pyverilog-ast",
+    "module": "aha_crypto",
+    "edits": [
+      "declare reg armed",
+      "clear armed in the !RST_N reset block",
+      "inject encryption-gated arming IfStatement into the START branch",
+      "wrap the result-latch right-hand side as armed ? KEY : <original>"
+    ]
+  }
+}

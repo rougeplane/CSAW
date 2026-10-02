@@ -1,0 +1,33 @@
+{
+  "verdict": "stealthy",
+  "normal_operation_preserved": true,
+  "trigger_probability": "2^-32 per random encrypt; effectively unreachable by normal traffic or random functional tests",
+  "detectability": {
+    "functional": "Very low: identical to the golden model for every input except the single magic word; black-box test vectors will not hit it.",
+    "equivalence": "Medium: formal equivalence against a trusted golden netlist would flag the one differing input, but only if the checker explores it; bounded random simulation will miss it.",
+    "structural": "Medium: a 32-bit equality comparator feeding a status flip-flop whose value gates the output path is a recognisable Trojan signature to a careful RTL/netlist reviewer or a Trojan-detection tool."
+  },
+  "findings": [
+    {
+      "severity": "info",
+      "observation": "Area overhead is a single flip-flop plus one 32-bit comparator; no change to BUSY timing or SPI framing.",
+      "mitigation": "N/A (this is what makes it stealthy)."
+    },
+    {
+      "severity": "medium",
+      "observation": "Once armed, every subsequent read returns the key until reset, so a victim who keeps operating would notice broken ciphertexts.",
+      "mitigation": "Attacker resets immediately after reading the key; or a refined variant could leak on only the single trigger transaction and self-disarm."
+    },
+    {
+      "severity": "medium",
+      "observation": "The payload loads the literal key constant, so a defender scanning for comparisons against, or fan-out from, the KEY localparam could find it.",
+      "mitigation": "Obfuscate by XOR-masking the leaked value, or spreading the key across several triggered reads."
+    }
+  ],
+  "recommendations": [
+    "Prove normal-operation preservation by equivalence-checking the dormant design against the golden model (done: 30 vectors, 0 mismatches).",
+    "Demonstrate the exploit end-to-end in simulation, including secret recovery with the stolen key (done).",
+    "Consider a self-disarming single-shot variant to reduce the observable window."
+  ],
+  "overall_risk": "high"
+}

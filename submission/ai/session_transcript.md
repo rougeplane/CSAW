@@ -1,6 +1,7 @@
 # Transcript — 1d4c92be-4b55-4eff-b7f6-a341d43690bf
 _source: /home/ahmed/.claude/projects/-home-ahmed-CSAW-CSAW-AI-Hardware-Attack-Challenge-2026/1d4c92be-4b55-4eff-b7f6-a341d43690bf.jsonl_  ·  _exported: 2026-10-02T18:02:28_  ·  _643 events_
 
+## The initial prompt is from User after which everything is by AI. The rest of the USER headers are the outputs AI generated on Users computer. ##
 
 ### 👤 User  `2026-10-02T21:17:52`
 
